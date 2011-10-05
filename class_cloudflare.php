@@ -8,50 +8,53 @@
  */
 class cloudflare_api {
 	
-	/**
-	 * The URL of the API
-	 */
+	//The URL of the API
 	const URL = 'https://www.cloudflare.com/api_json.html';
 	
-	/**
-	 * Timeout for the API requests in seconds
-	 */
+	//Timeout for the API requests in seconds
 	const TIMEOUT = 5;
 	
-	/**
-	 * Stores the api key
-	 *
-	 * @var string
-	 */
+	//Stores the api key
 	private $token_key;
 	
-	/**
-	 * Stores the email login
-	 * 
-	 * @var string
-	 */
+	//Stores the email login
 	private $email;
+	
+	//Data to post
+	private $data = array;
 	
 	/**
 	 * Make a new instance of the API client
-	 * 
-	 * @param string $email your login email address
-	 * @param string $token_key your api key
 	 */
 	public function __construct ($email, $token_key) {
 		$this->email = $email;
 		$this->token_key = $token_key;
-		if(!$this->email){ die("Must provide a valid email"); }
-		if(!$this->token_key){ die("Must Provide a valid api key"); }
+	}
+	
+	public function setEmail($email){
+		$this->email = $email;
+	}
+	
+	public function setToken($token_key){
+		$this->token_key = $token_key;
+	}
+	
+	/**
+	 * Developer Mode - This function allows you to toggle Development Mode on or off for a particular domain. 
+	 * When Development Mode is on the cache is bypassed. Development mode remains on for 3 hours or 
+	 * until when it is toggled back off.
+	 */
+	public function devmode($mode, $domain){
+		$data['a'] = "devmode";
+		$data['z'] = $domain;
+		$data['v'] = ($mode == true) ? 1 : 0;
+		return $this->http_post($data);
 	}
 	
 	/**
 	 * You can add an IP address to your whitelist.
-	 * 
-	 * @param string $ip the ip address
 	 */
 	public function whitelist_ip($ip){
-		$data = array();
 		$data['a'] = "wl";
 		$data['key'] = $ip;
 		return $this->http_post($data);
@@ -59,11 +62,8 @@ class cloudflare_api {
 	
 	/**
 	 * You can add an IP address to your blacklist.
-	 * 
-	 * @param string $ip the ip address
 	 */
 	public function blacklist_ip($ip){
-		$data = array();
 		$data['a'] = "ban";
 		$data['key'] = $ip;
 		return $this->http_post($data);
@@ -71,10 +71,6 @@ class cloudflare_api {
 	
 	/**
 	 * HTTP POST a specific task with the supplied data
-	 *
-	 * @param string $task
-	 * @param array $data
-	 * @return array
 	 */
 	private function http_post ($data) {
 		 $data['u'] = $this->email;
