@@ -52,6 +52,17 @@ class cloudflare_api {
 	}
 	
 	/**
+	 * Purge Cache - This function will purge CloudFlare of any cached files. It may take up to 48 hours for
+	 * the cache to rebuild and optimum performance to be achieved so this function should be used sparingly.
+	 */
+	 public function purge_cache(){
+		$data['a'] = "fpurge_ts";
+		$data['z'] = $domain;
+		$data['v'] = ($mode == true) ? 1 : 0;
+		return $this->http_post($data);
+	 }
+	
+	/**
 	 * You can add an IP address to your whitelist.
 	 */
 	public function whitelist_ip($ip){
