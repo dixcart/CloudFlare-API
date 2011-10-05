@@ -4,7 +4,7 @@
  * 
  * 
  * @author AzzA <azza@broadcasthe.net>
- * @copyright omgwtfhax inc. 2010
+ * @copyright omgwtfhax inc. 2011
  */
 class cloudflare_api {
 	
@@ -39,9 +39,34 @@ class cloudflare_api {
 	 * @param string $token_key your api key
 	 */
 	public function __construct ($email, $token_key) {
-		$this->api_key = $api_key;
-		$this->secret = $secret;
-		$this->default_icon_url = $default_icon_url;
+		$this->email = $email;
+		$this->token_key = $token_key;
+		if(!$this->email){ die("Must provide a valid email"); }
+		if(!$this->token_key){ die("Must Provide a valid api key"); }
+	}
+	
+	/**
+	 * You can add an IP address to your whitelist.
+	 * 
+	 * @param string $ip the ip address
+	 */
+	public function whitelist_ip($ip){
+		$data = array();
+		$data['a'] = "wl";
+		$data['key'] = $ip;
+		return $this->http_post($data);
+	}
+	
+	/**
+	 * You can add an IP address to your blacklist.
+	 * 
+	 * @param string $ip the ip address
+	 */
+	public function blacklist_ip($ip){
+		$data = array();
+		$data['a'] = "ban";
+		$data['key'] = $ip;
+		return $this->http_post($data);
 	}
 	
 	/**
@@ -51,7 +76,27 @@ class cloudflare_api {
 	 * @param array $data
 	 * @return array
 	 */
-	private function http_post () {
+	private function http_post ($data) {
+		 $data['u'] = $this->email;
+		 $data['tkn'] = $this->token_key;
+	     $ch = curl_init();
+	     curl_setopt($ch, CURLOPT_VERBOSE, 0);
+	     curl_setopt($ch, CURLOPT_FORBID_REUSE, true); 
+	     curl_setopt($ch, CURLOPT_URL, self::URL);
+	     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); 
+	     curl_setopt($ch, CURLOPT_POST, 1);
+	     curl_setopt($ch, CURLOPT_POSTFIELDS, $data ); 
+	     curl_setopt($ch, CURLOPT_TIMEOUT, self::TIMEOUT);
+	     $http_result = curl_exec($ch);
+	     $error = curl_error($ch);
+	     $http_code = curl_getinfo($ch ,CURLINFO_HTTP_CODE);
+	     curl_close($ch);
+	   
+	     if ($http_code != 200) {
+		     return array("error"=>$error);
+	     } else {
+		     return json_decode($http_result);
+	     }
 	}
 }
 
