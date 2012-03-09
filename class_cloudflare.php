@@ -28,18 +28,18 @@ class cloudflare_api {
      * Make a new instance of the API client
      */
     public function __construct() {
-    	$parameters = func_get_args();
-		switch (func_num_args()) {
-			case 1:
-				//a host API
-		        $this->host_key  = $parameters[0];
-				break;
-			case 2:
-				//a user request
-				$this->email     = $parameters[0];
-				$this->token_key = $parameters[1];
-				break;
-		}
+        $parameters = func_get_args();
+        switch (func_num_args()) {
+            case 1:
+                //a host API
+                $this->host_key  = $parameters[0];
+                break;
+            case 2:
+                //a user request
+                $this->email     = $parameters[0];
+                $this->token_key = $parameters[1];
+                break;
+        }
     }
     
     public function setEmail($email) {
