@@ -183,6 +183,32 @@ class cloudflare_api {
 		return $this->http_post($data);
 	  }
 	  
+          public function zone_check($zones) {
+              if (is_array($zones)) $zones = implode(",", $zones);
+		$data['a'] = 'zone_grab';
+		$data['zones'] = $zones;
+		return $this->http_post($data);
+          }
+          
+          public function del_dns($zone, $name) {
+              $data['a'] = 'rec_del';
+              $data['zone'] = $zone;
+              $data['name'] = $name;
+              return $this->http_post($data);
+          }
+
+          public function update_dns($host, $ip) {
+              $data['a'] = 'DIUP';
+              $data['ip'] = $ip;
+              $data['hosts'] = $host;
+              return $this->http_post($data);
+          }
+          
+          public function threat_score($ip) {
+              $data['a'] = 'ip_lkup';
+              $data['ip'] = $ip;
+              return $this->http_post($data);
+          }
 	  
 	  // HOST SECTION
 	  
