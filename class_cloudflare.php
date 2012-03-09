@@ -266,7 +266,7 @@ class cloudflare_api {
 	     if ($http_code != 200) {
 		     return array("error"=>$error);
 	     } else {
-		     return json_decode($http_result, true);
+		     return json_decode($http_result);
 	     }
 	 }
 }
