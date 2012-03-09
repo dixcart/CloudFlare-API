@@ -10,13 +10,15 @@
 class cloudflare_api {
 	
 	 //The URL of the API
-	 const URL = 'https://www.cloudflare.com/api_json.html';
+	 private $URL = array('USER' => 'https://www.cloudflare.com/api_json.html',
+	                      'HOST' => 'https://api.cloudflare.com/host-gw.html');
 	
 	 //Timeout for the API requests in seconds
 	 const TIMEOUT = 5;
 	
 	 //Stores the api key
 	 private $token_key;
+	 private $host_key;
 	
 	 //Stores the email login
 	 private $email;
@@ -27,9 +29,10 @@ class cloudflare_api {
 	 /**
 	  * Make a new instance of the API client
 	  */
-	 public function __construct ($email, $token_key) {
+	 public function __construct ($email, $token_key, $host_key = '') {
 		$this->email = $email;
 		$this->token_key = $token_key;
+		$this->host_ket = $host_key;
 	 }
 	
 	 public function setEmail($email){
@@ -40,6 +43,17 @@ class cloudflare_api {
 		$this->token_key = $token_key;
 	 }
 	
+	 /**
+	  * Stats
+	  */
+	 public function stats($domain, $interval = 20){
+		$data['a'] = "stats";
+		$data['z'] = $domain;
+		$data['interval'] = $interval;
+		return $this->http_post($data);
+	 }
+
+
 	 /**
 	  * Developer Mode - This function allows you to toggle Development Mode on or off for a particular domain. 
 	  * When Development Mode is on the cache is bypassed. Development mode remains on for 3 hours or 
@@ -168,21 +182,83 @@ class cloudflare_api {
 		$data['zid'] = $zoneid;
 		return $this->http_post($data);
 	  }
-	
+	  
+	  
+	  // HOST SECTION
+	  
+	  public function user_create($email, $password, $username = '', $id = '') {
+	    $data['act'] = 'user_create';
+		$data['cloudflare_email'] = $email;
+		$data['cloudflare_pass'] = $password;
+		$data['cloudflare_username'] = $username;
+		$data['unique_id'] = $id;
+		return $this->http_post($data, 'HOST');
+	  }
+
+	  public function zone_set($key, $zone, $resolve_to, $subdomains) {
+		if (is_array($subdomains)) $sudomains = implode(",", $subdomains);
+	    $data['act'] = 'zone_set';
+		$data['user_key'] = $key;
+		$data['zone_name'] = $zone;
+		$data['resolve_to'] = $resolve_to;
+		$data['subdomains'] = $subdomains;
+		return $this->http_post($data, 'HOST');
+	  }
+	  
+	  public function user_lookup($email, $isID = false) {
+	    $data['act'] = 'user_lookup';
+		if ($isID) {
+		    $data['unique_id'] = $email;
+		} else {
+			$data['cloudflare_email'] = $email;
+		}			  
+		return $this->http_post($data, 'HOST');
+	  }
+	  
+	  public function user_auth($email, $pass, $id = '') {
+	    $data['act'] = 'user_auth';
+		$data['cloudflare_email'] = $email;
+		$data['cloudflare_pass'] = $password;
+		$data['unique_id'] = $id;
+		return $this->http_post($data, 'HOST');
+	  }
+	  
+	  public function zone_lookup($zone, $user_key) {
+	    $data['act'] = 'zone_lookup';
+		$data['user_key'] = $user_key;
+		$data['zone_name'] = $zone;
+		return $this->http_post($data, 'HOST');
+	  }
+	  
+	  public function zone_delete($zone, $user_key) {
+	    $data['act'] = 'zone_delete';
+		$data['user_key'] = $user_key;
+		$data['zone_name'] = $zone;
+		return $this->http_post($data, 'HOST');
+	  }
+
 	 /**
 	  * HTTP POST a specific task with the supplied data
 	  */
-	 private function http_post ($data) {
-		 $data['u'] = $this->email;
-		 $data['tkn'] = $this->token_key;
+	 private function http_post ($data, $type = 'USER') {
+		 switch ($type) {
+			 case 'USER':
+				 $data['u'] = $this->email;
+				 $data['tkn'] = $this->token_key;
+				 break;
+			 case 'HOST':
+			 	 $data['host_key'] = $this->host_key;
+				 break;
+		 }
 		 $ch = curl_init();
 		 curl_setopt($ch, CURLOPT_VERBOSE, 0);
 		 curl_setopt($ch, CURLOPT_FORBID_REUSE, true); 
-		 curl_setopt($ch, CURLOPT_URL, self::URL);
+		 curl_setopt($ch, CURLOPT_URL, $this->URL[$type]);
 		 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); 
 		 curl_setopt($ch, CURLOPT_POST, 1);
 		 curl_setopt($ch, CURLOPT_POSTFIELDS, $data ); 
 		 curl_setopt($ch, CURLOPT_TIMEOUT, self::TIMEOUT);
+		 curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 		 $http_result = curl_exec($ch);
 		 $error = curl_error($ch);
 		 $http_code = curl_getinfo($ch ,CURLINFO_HTTP_CODE);
@@ -190,7 +266,7 @@ class cloudflare_api {
 	     if ($http_code != 200) {
 		     return array("error"=>$error);
 	     } else {
-		     return json_decode($http_result);
+		     return json_decode($http_result, true);
 	     }
 	 }
 }
