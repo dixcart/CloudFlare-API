@@ -193,7 +193,7 @@ class cloudflare_api {
     public function zone_check($zones) {
         if (is_array($zones))
             $zones = implode(",", $zones);
-        $data['a']     = 'zone_grab';
+        $data['a']     = 'zone_check';
         $data['zones'] = $zones;
         return $this->http_post($data);
     }
