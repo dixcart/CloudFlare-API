@@ -253,7 +253,7 @@ class cloudflare_api {
     public function user_auth($email, $pass, $id = '') {
         $data['act']              = 'user_auth';
         $data['cloudflare_email'] = $email;
-        $data['cloudflare_pass']  = $password;
+        $data['cloudflare_pass']  = $pass;
         $data['unique_id']        = $id;
         return $this->http_post($data, 'HOST');
     }
