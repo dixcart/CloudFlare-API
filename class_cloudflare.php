@@ -187,6 +187,7 @@ class cloudflare_api {
      */
     public function add_dns_record($zone, $type, $content, $name, $mode) {
         $data['a']            = 'rec_set';
+	$data['zone']         = $zone;
         $data['type']         = ($type == 'A') ? 'A' : 'CNAME';
         $data['content']      = $content;
         $data['name']         = $name;
