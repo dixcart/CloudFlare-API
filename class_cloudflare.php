@@ -21,6 +21,9 @@ class cloudflare_api {
     //Stores the email login
     private $email;
     
+    //If you want to output an array instead of an object
+    private $out_array = false;
+    
     //Data to post
     private $data = array();
     
@@ -48,6 +51,11 @@ class cloudflare_api {
     
     public function setToken($token_key) {
         $this->token_key = $token_key;
+    }
+    
+    //Set to output an associative array instead of an object
+    public function useArray($value = true) {
+        $this->out_array = $value;
     }
     
     /**
@@ -303,7 +311,7 @@ class cloudflare_api {
                 "error" => $error
             );
         } else {
-            return json_decode($http_result);
+            return json_decode($http_result, $this->out_array);
         }
     }
 }
