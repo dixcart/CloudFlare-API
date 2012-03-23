@@ -59,7 +59,11 @@ class cloudflare_api {
     }
     
     /**
-     * Stats
+     * Stats about the zone
+     * 
+     * @param string $domain - zone name (example.com)
+     * @param int $interval - 10 = 1 year, 20 = 30 day, 30 = 7 day, 40 = 24 hours, 100 = < 24 hours, 110 = <12 hours, 120 = <6 hours
+     * @return array - associative array 
      */
     public function stats($domain, $interval = 20) {
         $data['a']        = "stats";
@@ -68,11 +72,14 @@ class cloudflare_api {
         return $this->http_post($data);
     }
     
-    
     /**
-     * Developer Mode - This function allows you to toggle Development Mode on or off for a particular domain. 
-     * When Development Mode is on the cache is bypassed. Development mode remains on for 3 hours or 
-     * until when it is toggled back off.
+     * This function allows you to toggle Development Mode on or off for a particular domain. When Development
+     * Mode is on the cache is bypassed. Development mode remains on for 3 hours or until when it is toggled back
+     * off.
+     * 
+     * @param bool $mode - true for on, false for off
+     * @param string $domain - zone to applt to (e.g. example.com)
+     * @return array - associative array
      */
     public function devmode($mode, $domain) {
         $data['a'] = "devmode";
@@ -82,8 +89,12 @@ class cloudflare_api {
     }
     
     /**
-     * Purge Cache - This function will purge CloudFlare of any cached files. It may take up to 48 hours for
-     * the cache to rebuild and optimum performance to be achieved so this function should be used sparingly.
+     * This function will purge CloudFlare of any cached files. It may take up to 48 hours for the cache to rebuild
+     * and optimum performance to be achieved so this function should be used sparingly.
+     * 
+     * @param bool $mode - whether to actually purge the cache //TODO: is this necessary?
+     * @param type $domain - zone (example.com)
+     * @return array - associative array
      */
     public function purge_cache($mode, $domain) {
         $data['a'] = "fpurge_ts";
@@ -93,7 +104,11 @@ class cloudflare_api {
     }
     
     /**
-     * You can add an IP address to your whitelist.
+     * TODO: Docs say this should be a GET and returns "OK" not JSON.
+     * Whitelist an IP on your whole account
+     *
+     * @param string $ip - the IP address you want to whitelist
+     * @return array - associative array 
      */
     public function whitelist_ip($ip) {
         $data['a']   = "wl";
@@ -102,7 +117,11 @@ class cloudflare_api {
     }
     
     /**
-     * You can add an IP address to your blacklist.
+     * TODO: Docs say this should be a GET and returns "OK" not JSON.
+     * Ban an IP on your whole account
+     *
+     * @param string $ip - the IP address you want to whitelist
+     * @return array - associative array 
      */
     public function blacklist_ip($ip) {
         $data['a']   = "ban";
@@ -111,7 +130,11 @@ class cloudflare_api {
     }
     
     /**
-     * Set Cache Level - This function sets the Caching Level to Aggressive or Basic. (agg|basic)
+     * This function sets the Caching Level to Aggressive or Basic.
+     * 
+     * @param string $mode - "agg" or "basic"
+     * @param string $domain - zone (example.com)
+     * @return array - associative array 
      */
     public function set_cache_lvl($mode, $domain) {
         $data['a'] = "cache_lvl";
@@ -121,8 +144,11 @@ class cloudflare_api {
     }
     
     /**
-     * Set Security Level - This function sets the Basic Security Level to HIGH / MEDIUM / LOW / ESSENTIALLY OFF.
-     * (high|med|low|eoff)
+     * This function sets the Basic Security Level to HIGH / MEDIUM / LOW / ESSENTIALLY OFF.
+     * 
+     * @param string $mode - one of (high|med|low|eoff)
+     * @param string $domain - zone (example.com)
+     * @return array - associative array
      */
     public function set_security_lvl($mode, $domain) {
         $data['a'] = "sec_lvl";
@@ -132,12 +158,13 @@ class cloudflare_api {
     }
     
     /**
-     * Pull recent IPs hitting your site
      * Returns a list of IP addresses which hit your site classified by type.
-     * $zoneid = ID of the zone you would like to check. 
-     * $hours = Number of hours to go back. Default is 24, max is 48.
-     * $class = Restrict the result set to a given class. Currently r|s|t, for regular, crawler, threat resp.
-     * $geo = Optional token. Add to add longitude and latitude information to the response. 0,0 means no data.
+     * 
+     * @param int $zoneid - ID of the zone you would like to check. 
+     * @param int $hours - Number of hours to go back. Default is 24, max is 48.
+     * @param char $class - Restrict the result set to a given class. Currently r|s|t, for regular, crawler, threat resp.
+     * @param type $geo - Optional token. Add to add longitude and latitude information to the response. 0,0 means no data.
+     * @return array - associative array
      */
     public function get_zone_ips($zoneid, $hours, $class, $geo = '0,0') {
         $data['a']     = 'zone_ips';
@@ -149,12 +176,14 @@ class cloudflare_api {
     }
     
     /**
-     * Create a new DNS record - Creates a new DNS record for your site. This can be either a CNAME or A record.
-     * $zone = zone
-     * $type = A|CNAME
-     * $content = The value of the cname or IP address (the destination).
-     * $name = The name of the record you wish to create.
-     * $mode = 0 or 1. 0 means CloudFlare is off (grey cloud) for the new zone, while 1 means a happy orange cloud.
+     * Creates a new DNS record for your site. This can be either a CNAME or A record.
+     * 
+     * @param string $zone - zone (example.com)
+     * @param string $type - one of (A|CNAME)
+     * @param string $content - The value of the cname or IP address (the destination).
+     * @param string $name - The name of the record you wish to create.
+     * @param bool $mode - false means CloudFlare is off (grey cloud) for the new zone, while true means a happy orange cloud.
+     * @return array - associative array
      */
     public function add_dns_record($zone, $type, $content, $name, $mode) {
         $data['a']            = 'rec_set';
